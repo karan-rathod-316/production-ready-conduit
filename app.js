@@ -11,6 +11,7 @@ const errorhandler = require('errorhandler');
 const mongoose = require('mongoose');
 // requiring our user model
 require('./models/User')
+require('./models/Article');
 require('./config/passport')
 
 
