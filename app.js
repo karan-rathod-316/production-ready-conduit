@@ -12,6 +12,7 @@ const mongoose = require('mongoose');
 // requiring our user model
 require('./models/User')
 require('./models/Article');
+require('./models/Comment');
 require('./config/passport')
 
 

@@ -1,16 +1,20 @@
-var mongoose = require('mongoose');
-var uniqueValidator = require('mongoose-unique-validator');
-var slug = require('slug'); // for url slugs
+const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
+const slug = require('slug'); // for url slugs
+const User = mongoose.model('User');
 
-var ArticleSchema = new mongoose.Schema({
+const ArticleSchema = new mongoose.Schema({
   slug: {type: String, lowercase: true, unique: true},
   title: String,
   description: String,
   body: String,
   favoritesCount: {type: Number, default: 0},
   tagList: [{ type: String }],
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
-}, {timestamps: true});
+  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
+}, 
+{usePushEach: true},
+{timestamps: true});
 
 ArticleSchema.plugin(uniqueValidator, {message: 'is already taken'});
 
@@ -35,10 +39,22 @@ ArticleSchema.methods.toJSONFor = function(user){
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       tagList: this.tagList,
+      favorited: user ? user.isFavorite(this._id) : false,
       favoritesCount: this.favoritesCount,
       author: this.author.toProfileJSONFor(user)
     };
   };
   
+//update the favorite count
+ArticleSchema.methods.updateFavoriteCount = function() {
+  var article = this;
+
+  return User.count({favorites: {$in: [article._id]}}).then(function(count){
+    article.favoritesCount = count;
+
+    return article.save();
+  });
+};
+
 
 mongoose.model('Article', ArticleSchema);
