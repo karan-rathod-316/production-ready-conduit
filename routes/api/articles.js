@@ -11,7 +11,7 @@ router.post('/', auth.required, function(req, res, next) {
     User.findById(req.payload.id).then(function(user){
       if (!user) { return res.sendStatus(401); }
   
-      var article = new Article(req.body.article);
+      const article = new Article(req.body.article);
   
       article.author = user;
   
@@ -39,7 +39,7 @@ router.get('/:article', auth.optional, function(req, res, next) {
       req.payload ? User.findById(req.payload.id) : null,
       req.article.populate('author').execPopulate()
     ]).then(function(results){
-      var user = results[0];
+      const user = results[0];
   
       return res.json({article: req.article.toJSONFor(user)});
     }).catch(next);
@@ -82,7 +82,7 @@ router.delete('/:article', auth.required, function(req, res, next) {
   });
   
 router.post('/:article/favorite', auth.required, function(req, res, next) {
-    var articleId = req.article._id;
+  const articleId = req.article._id;
   
     User.findById(req.payload.id).then(function(user){
       if (!user) { return res.sendStatus(401); }
@@ -98,7 +98,7 @@ router.post('/:article/favorite', auth.required, function(req, res, next) {
 
 //unfavorite
 router.delete('/:article/favorite', auth.required, function(req, res, next) {
-  var articleId = req.article._id;
+  const articleId = req.article._id;
 
   User.findById(req.payload.id).then(function (user){
     if (!user) { return res.sendStatus(401); }
@@ -116,7 +116,7 @@ router.post('/:article/comments', auth.required, function(req, res, next) {
   User.findById(req.payload.id).then(function(user){
     if(!user){ return res.sendStatus(401); }
 
-    var comment = new Comment(req.body.comment);
+    const comment = new Comment(req.body.comment);
     comment.article = req.article;
     comment.author = user;
 
@@ -179,9 +179,9 @@ router.delete('/:article/comments/:comment', auth.required, function(req, res, n
 
 //list all articles
 router.get('/', auth.optional, function(req, res, next) {
-  var query = {};
-  var limit = 20;
-  var offset = 0;
+  const query = {};
+  const limit = 20;
+  const offset = 0;
 
   if(typeof req.query.limit !== 'undefined'){
     limit = req.query.limit;
@@ -199,8 +199,8 @@ Promise.all([
        req.query.author ? User.findOne({username: req.query.author}) : null,
        req.query.favorited ? User.findOne({username: req.query.favorited}) : null
      ]).then(function(results){
-       var author = results[0];
-       var favoriter = results[1];
+      const author = results[0];
+      const favoriter = results[1];
     
        if(author){
          query.author = author._id;
@@ -224,9 +224,9 @@ Promise.all([
     Article.count(query).exec(),
     req.payload ? User.findById(req.payload.id) : null,
   ]).then(function(results){
-    var articles = results[0];
-    var articlesCount = results[1];
-    var user = results[2];
+    const articles = results[0];
+    const articlesCount = results[1];
+    const user = results[2];
 
     return res.json({
       articles: articles.map(function(article){
@@ -240,8 +240,8 @@ Promise.all([
 
 // Feed endpoint
 router.get('/feed', auth.required, function(req, res, next) {
-  var limit = 20;
-  var offset = 0;
+  const limit = 20;
+  const offset = 0;
 
   if(typeof req.query.limit !== 'undefined'){
     limit = req.query.limit;
@@ -262,8 +262,8 @@ router.get('/feed', auth.required, function(req, res, next) {
         .exec(),
       Article.count({ author: {$in: user.following}})
     ]).then(function(results){
-      var articles = results[0];
-      var articlesCount = results[1];
+      const articles = results[0];
+      const articlesCount = results[1];
 
       return res.json({
         articles: articles.map(function(article){

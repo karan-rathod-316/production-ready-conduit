@@ -9,7 +9,7 @@ function getTokenFromHeader(req){
       return null;
 }
     
-    var auth = {
+const auth = {
       required: jwt({
         secret: secret,
         userProperty: 'payload',
