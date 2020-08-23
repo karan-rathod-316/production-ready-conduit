@@ -7,6 +7,44 @@ const Comment = mongoose.model('Comment');
 
 const auth = require('../auth');
 
+// Feed endpoint
+router.get('/feed', auth.required, function(req, res, next) {
+  console.log("Entered")
+  const limit = 20;
+  const offset = 0;
+
+  if(typeof req.query.limit !== 'undefined'){
+    limit = req.query.limit;
+  }
+
+  if(typeof req.query.offset !== 'undefined'){
+    offset = req.query.offset;
+  }
+
+  User.findById(req.payload.id).then(function(user){
+    if (!user) { return res.sendStatus(401); }
+
+    Promise.all([
+      Article.find({ author: {$in: user.following}})
+        .limit(Number(limit))
+        .skip(Number(offset))
+        .populate('author')
+        .exec(),
+      Article.count({ author: {$in: user.following}})
+    ]).then(function(results){
+      const articles = results[0];
+      const articlesCount = results[1];
+
+      return res.json({
+        articles: articles.map(function(article){
+          return article.toJSONFor(user);
+        }),
+        articlesCount: articlesCount
+      });
+    }).catch(next);
+  });
+});
+
 router.post('/', auth.required, function(req, res, next) {
     User.findById(req.payload.id).then(function(user){
       if (!user) { return res.sendStatus(401); }
@@ -238,42 +276,7 @@ Promise.all([
   }).catch(next)
 });
 
-// Feed endpoint
-router.get('/feed', auth.required, function(req, res, next) {
-  const limit = 20;
-  const offset = 0;
 
-  if(typeof req.query.limit !== 'undefined'){
-    limit = req.query.limit;
-  }
-
-  if(typeof req.query.offset !== 'undefined'){
-    offset = req.query.offset;
-  }
-
-  User.findById(req.payload.id).then(function(user){
-    if (!user) { return res.sendStatus(401); }
-
-    Promise.all([
-      Article.find({ author: {$in: user.following}})
-        .limit(Number(limit))
-        .skip(Number(offset))
-        .populate('author')
-        .exec(),
-      Article.count({ author: {$in: user.following}})
-    ]).then(function(results){
-      const articles = results[0];
-      const articlesCount = results[1];
-
-      return res.json({
-        articles: articles.map(function(article){
-          return article.toJSONFor(user);
-        }),
-        articlesCount: articlesCount
-      });
-    }).catch(next);
-  });
-});
 
 
 module.exports = router;

@@ -15,6 +15,8 @@ require('./models/Article');
 require('./models/Comment');
 require('./config/passport')
 
+const articleRoute = require("./routes/api/articles");
+
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -38,13 +40,14 @@ if (!isProduction) {
 }
 
 if(isProduction){
-  mongoose.connect(process.env.MONGODB_URI);
+  mongoose.connect(process.env.MONGODB_URI,{useCreateIndex:true,useUnifiedTopology:true,useNewUrlParser:true});
 } else {
-  mongoose.connect('mongodb://localhost/conduit');
+  mongoose.connect('mongodb://localhost/conduit',{useCreateIndex:true,useUnifiedTopology:true,useNewUrlParser:true});
   mongoose.set('debug', true);
 }
 
 app.use(require('./routes'));
+app.use("/api/articles",articleRoute);
 
 /// catch 404 and forward to error handler
 app.use(function(req, res, next) {
