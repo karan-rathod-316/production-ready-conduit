@@ -9,7 +9,7 @@ function getTokenFromHeader(req){
       return null;
 }
     
-const auth = {
+constgit  auth = {
       required: jwt({
         secret: secret,
         userProperty: 'payload',
